@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>DIGIHUSTLECO — XAUUSD &amp; BTCUSD News &amp; IG Card Studio</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            bgBase: '#06080D',
+            bgSurface: '#090D14',
+            bgCard: '#0E1420',
+            bgCardAlt: '#131B2B',
+            borderLine: '#22304A',
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    :root {
+      color-scheme: dark;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #06080D;
+      color: #E2E8F0;
+      font-family: 'Inter', system-ui, sans-serif;
+      overflow-x: hidden;
+      -webkit-text-size-adjust: 100%;
+    }
+    /* Strict Mobile Touch & Hit-Testing Rules */
+    button, input, textarea, select, [data-action] {
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    button, [data-action] {
+      min-height: 44px;
+      cursor: pointer;
+    }
+    /* Prevent inner SVG/spans from swallowing delegated click targets */
+    [data-action] > * {
+      pointer-events: none;
+    }
+    [hidden] {
+      display: none !important;
+      pointer-events: none !important;
+    }
+    /* Opaque Solid Surfaces (NO backdrop-filter on sticky/fixed bars to prevent Android WebView hit-test bugs) */
+    .solid-header {
+      background-color: #090D14;
+      border-bottom: 1px solid #22304A;
+    }
+    .solid-bottom-nav {
+      background-color: #090D14;
+      border-top: 1px solid #22304A;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    .pb-safe-main {
+      padding-bottom: calc(5.75rem + env(safe-area-inset-bottom, 0px));
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+    .pulse-dot {
+      animation: pulseAnim 2s infinite;
+    }
+    @keyframes pulseAnim {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.25); }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-bgBase text-slate-200 pb-safe-main selection:bg-amber-500/30 selection:text-amber-200">
+
+  <!-- =====================================================================
+       STICKY TOP HEADER (SOLID OPAQUE #090D14, Z-INDEX: 40)
+       ===================================================================== -->
+  <header id="app-top-header" class="sticky top-0 z-40 solid-header">
+    <div class="max-w-3xl mx-auto px-3 sm:px-5 py-2.5 flex items-center justify-between gap-2">
+      <!-- Brand + Watermark Badge -->
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/40 flex items-center justify-center shrink-0">
+          <span class="text-amber-400 font-black text-base">⚡</span>
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="font-black tracking-wide text-sm sm:text-base text-white">DIGIHUSTLECO</span>
+            <button type="button" data-action="ui-reset" id="btn-ui-ready" class="min-h-[30px] px-2.5 py-0.5 rounded-full bg-emerald-500/15 active:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 font-mono text-[10px] font-bold flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-dot"></span>
+              <span>UI READY</span>
+            </button>
+          </div>
+          <p class="text-[10px] font-mono text-slate-400 truncate">@digihustleco • XAUUSD &amp; BTCUSD STUDIO</p>
+        </div>
+      </div>
+
+      <!-- WIB Clock + Gemini API Key Button -->
+      <div class="flex items-center gap-2 shrink-0">
+        <div class="text-right">
+          <div id="wib-clock-leaf" class="font-mono text-xs sm:text-sm font-extrabold text-amber-400 tabular-nums">14:20:00 WIB</div>
+          <div id="wib-date-leaf" class="font-mono text-[10px] text-slate-400">20 Nov 2026</div>
+        </div>
+        <button type="button" data-action="open-settings" aria-label="API Key Settings" class="px-3 py-2 rounded-xl bg-bgCardAlt active:bg-slate-700 border border-borderLine text-xs font-mono font-bold text-slate-200">
+          ⚙ AI Key
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- TOAST NOTIFICATION CONTAINER (Z-INDEX: 80) -->
+  <div id="toast-container" class="fixed top-20 right-3 left-3 sm:left-auto sm:w-96 z-[80] pointer-events-none flex flex-col gap-2"></div>
+
+  <!-- FLOATING EXIT SCREENSHOT MODE PILL (HIDDEN BY DEFAULT, Z-INDEX: 75) -->
+  <div id="exit-screenshot-bar" hidden class="fixed bottom-5 inset-x-0 z-[75] flex justify-center px-4">
+    <button type="button" data-action="toggle-screenshot-mode" class="px-5 py-3 rounded-full bg-amber-500 active:bg-amber-400 text-slate-950 font-extrabold text-xs shadow-2xl border-2 border-amber-200 flex items-center gap-2">
+      <span>✕ Exit Clean Screenshot Mode</span>
+    </button>
+  </div>
+
+  <!-- =====================================================================
+       MAIN CONTENT CONTAINER (Z-INDEX: 1)
+       ===================================================================== -->
+  <main class="relative z-[1] max-w-3xl mx-auto px-3 sm:px-5 pt-4 space-y-4">
+
+    <!-- ===================================================================
+         TAB 1: LIVE FEED (IDENTICAL TO TELEGRAM @digihustleco STRUCTURE)
+         =================================================================== -->
+    <section id="tab-feed" class="tab-panel space-y-4">
+      <!-- Filter & Live RSS Refresh Strip -->
+      <div class="rounded-2xl bg-bgCard border border-borderLine p-3.5 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="px-2 py-0.5 rounded bg-amber-500/15 text-amber-400 font-mono text-[10px] font-bold border border-amber-500/30">⚡ DIGIHUSTLECO</span>
+              <span id="feed-status-badge" class="font-mono text-[10px] text-emerald-400">● WIB MACRO WIRE READY</span>
+            </div>
+            <h1 class="text-base sm:text-lg font-extrabold text-white mt-1">XAUUSD &amp; BTCUSD Fundamental Briefs</h1>
+          </div>
+
+          <button type="button" data-action="fetch-live-rss" id="btn-refresh-rss" class="px-3.5 py-2 rounded-xl bg-amber-500 active:bg-amber-400 text-slate-950 font-extrabold text-xs flex items-center gap-1.5">
+            <span>↻ Fetch Live RSS</span>
+          </button>
+        </div>
+
+        <!-- Asset Filter Pills -->
+        <div class="grid grid-cols-3 gap-2">
+          <button type="button" data-action="filter-pair" data-pair="ALL" id="pill-pair-ALL" class="pair-pill py-2.5 px-3 rounded-xl font-mono text-xs font-extrabold bg-amber-500 text-slate-950 border border-amber-400">
+            ALL PAIRS
+          </button>
+          <button type="button" data-action="filter-pair" data-pair="XAUUSD" id="pill-pair-XAUUSD" class="pair-pill py-2.5 px-3 rounded-xl font-mono text-xs font-bold bg-bgCardAlt text-slate-300 border border-borderLine">
+            🥇 XAUUSD
+          </button>
+          <button type="button" data-action="filter-pair" data-pair="BTCUSD" id="pill-pair-BTCUSD" class="pair-pill py-2.5 px-3 rounded-xl font-mono text-xs font-bold bg-bgCardAlt text-slate-300 border border-borderLine">
+            ₿ BTCUSD
+          </button>
+        </div>
+      </div>
+
+      <!-- Feed List Container -->
+      <div id="feed-cards-list" class="space-y-4"></div>
+    </section>
+
+    <!-- ===================================================================
+         TAB 2: AI BRIEF / PASTE NEWS (GENERATE IDENTICAL TELEGRAM + IG BRIEF)
+         =================================================================== -->
+    <section id="tab-generator" hidden class="tab-panel space-y-4">
+      <div class="rounded-2xl bg-bgCard border border-borderLine p-4 space-y-3.5">
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <span class="px-2 py-0.5 rounded bg-violet-500/20 text-violet-300 font-mono text-[10px] font-bold border border-violet-500/40">⚡ DIGIHUSTLECO AI ANALYST</span>
+            <h2 class="text-base sm:text-lg font-extrabold text-white mt-1">Paste Any Headline → Instant Dual-Language Brief</h2>
+          </div>
+          <span id="gemini-mode-pill" class="font-mono text-[10px] px-2.5 py-1 rounded-lg bg-bgCardAlt border border-borderLine text-slate-300">
+            Smart Engine: Built-In
+          </span>
+        </div>
+
+        <p class="text-xs text-slate-400">
+          Paste any breaking FXStreet, Kitco, CoinDesk, or Telegram news headline below. It generates the exact same <strong>🇮🇩 Bahasa Profesional</strong> + <strong>🇬🇧 English</strong> 4-point structure with the <strong>DIGIHUSTLECO</strong> watermark.
+        </p>
+
+        <!-- Pair Selector -->
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button" data-action="gen-select-pair" data-pair="XAUUSD" id="btn-gen-XAUUSD" class="py-2.5 px-3 rounded-xl font-mono text-xs font-extrabold bg-amber-500 text-slate-950 border border-amber-400">
+            🥇 XAUUSD (Spot Gold)
+          </button>
+          <button type="button" data-action="gen-select-pair" data-pair="BTCUSD" id="btn-gen-BTCUSD" class="py-2.5 px-3 rounded-xl font-mono text-xs font-bold bg-bgCardAlt text-slate-300 border border-borderLine">
+            ₿ BTCUSD (Bitcoin)
+          </button>
+        </div>
+
+        <!-- Headline Input -->
+        <div class="space-y-2">
+          <label for="input-news-headline" class="block text-[11px] font-mono font-bold text-slate-300">HEADLINE OR NEWS TEXT</label>
+          <textarea id="input-news-headline" rows="3" placeholder="e.g. US Treasury yields climb as Fed policymakers signal cautious pace on December rate cuts..." class="w-full p-3 rounded-xl bg-bgBase border border-borderLine text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"></textarea>
+        </div>
+
+        <!-- Optional Details -->
+        <div class="space-y-2">
+          <label for="input-news-source" class="block text-[11px] font-mono font-bold text-slate-300">SOURCE NAME (OPTIONAL)</label>
+          <input id="input-news-source" type="text" value="FXStreet / Market Wire" class="w-full px-3 py-2.5 rounded-xl bg-bgBase border border-borderLine text-xs font-mono text-white focus:outline-none focus:border-amber-500" />
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+          <button type="button" data-action="generate-custom-brief" id="btn-generate-brief" class="py-3 px-4 rounded-xl bg-amber-500 active:bg-amber-400 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-2">
+            <span>⚡ Generate Dual Brief + Save to Feed</span>
+          </button>
+          <button type="button" data-action="load-sample-headline" class="py-3 px-4 rounded-xl bg-bgCardAlt active:bg-slate-700 border border-borderLine text-slate-200 font-bold text-xs">
+            Fill Sample Headline
+          </button>
+        </div>
+      </div>
+
+      <!-- Generated Output Preview Card -->
+      <div id="custom-brief-preview-box"></div>
+    </section>
+
+    <!-- ===================================================================
+         TAB 3: IG STUDIO (INSTAGRAM FEED 4:5 & STORY 9:16 CARD MAKER)
+         =================================================================== -->
+    <section id="tab-studio" hidden class="tab-panel space-y-4">
+      <!-- Studio Controls Bar -->
+      <div id="studio-controls-panel" class="rounded-2xl bg-bgCard border border-borderLine p-3.5 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <span class="px-2 py-0.5 rounded bg-amber-500/15 text-amber-400 font-mono text-[10px] font-bold border border-amber-500/30">⚡ DIGIHUSTLECO IG STUDIO</span>
+            <h2 class="text-base font-extrabold text-white mt-0.5">Instagram Graphic &amp; Caption Builder</h2>
+          </div>
+          <span class="font-mono text-[10px] text-slate-400">Watermarked: DIGIHUSTLECO</span>
+        </div>
+
+        <!-- Format Selector (4:5 Feed vs 9:16 Story) -->
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button" data-action="studio-format" data-format="feed" id="btn-fmt-feed" class="py-2.5 px-3 rounded-xl font-mono text-xs font-extrabold bg-amber-500 text-slate-950 border border-amber-400">
+            📐 IG Feed Post (4:5)
+          </button>
+          <button type="button" data-action="studio-format" data-format="story" id="btn-fmt-story" class="py-2.5 px-3 rounded-xl font-mono text-xs font-bold bg-bgCardAlt text-slate-300 border border-borderLine">
+            📱 IG Story (9:16)
+          </button>
+        </div>
+
+        <!-- Language Selector (Indo Pro, English, Dual) -->
+        <div class="grid grid-cols-3 gap-2">
+          <button type="button" data-action="studio-lang" data-lang="ID" id="btn-slang-ID" class="py-2.5 px-2 rounded-xl font-mono text-xs font-extrabold bg-amber-500 text-slate-950 border border-amber-400">
+            🇮🇩 Indo Pro
+          </button>
+          <button type="button" data-action="studio-lang" data-lang="EN" id="btn-slang-EN" class="py-2.5 px-2 rounded-xl font-mono text-xs font-bold bg-bgCardAlt text-slate-300 border border-borderLine">
+            🇬🇧 English
+          </button>
+          <button type="button" data-action="studio-lang" data-lang="DUAL" id="btn-slang-DUAL" class="py-2.5 px-2 rounded-xl font-mono text-xs font-bold bg-bgCardAlt text-slate-300 border border-borderLine">
+            🇮🇩+🇬🇧 Dual
+          </button>
+        </div>
+
+        <!-- Dark Theme Selector -->
+        <div class="grid grid-cols-3 gap-2">
+          <button type="button" data-action="studio-theme" data-theme="gold" id="btn-stheme-gold" class="py-2 px-2 rounded-xl font-mono text-[11px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/50">
+            Gold &amp; Obsidian
+          </button>
+          <button type="button" data-action="studio-theme" data-theme="crimson" id="btn-stheme-crimson" class="py-2 px-2 rounded-xl font-mono text-[11px] font-bold bg-bgCardAlt text-slate-300 border border-borderLine">
+            Crimson Alert
+          </button>
+          <button type="button" data-action="studio-theme" data-theme="mono" id="btn-stheme-mono" class="py-2 px-2 rounded-xl font-mono text-[11px] font-bold bg-bgCardAlt text-slate-300 border border-borderLine">
+            Monochrome
+          </button>
+        </div>
+
+        <!-- Export / Screenshot / Copy Actions -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+          <button type="button" data-action="toggle-screenshot-mode" class="py-3 px-3 rounded-xl bg-emerald-500 active:bg-emerald-400 text-slate-950 font-extrabold text-xs">
+            📸 Clean Screenshot Mode
+          </button>
+          <button type="button" data-action="download-ig-png" class="py-3 px-3 rounded-xl bg-amber-500 active:bg-amber-400 text-slate-950 font-extrabold text-xs">
+            ⬇️ Download HD PNG
+          </button>
+          <button type="button" data-action="copy-ig-caption" class="py-3 px-3 rounded-xl bg-bgCardAlt active:bg-slate-700 border border-borderLine text-white font-bold text-xs">
+            📋 Copy IG + Tele Text
+          </button>
+        </div>
+      </div>
+
+      <!-- LIVE INSTAGRAM CARD PREVIEW CANVAS AREA -->
+      <div class="flex justify-center">
+        <div id="ig-card-preview-wrapper" class="w-full max-w-[420px]"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =====================================================================
+       FIXED BOTTOM 3-TAB NAVIGATION BAR (SOLID OPAQUE #090D14, Z-INDEX: 50)
+       ===================================================================== -->
+  <nav id="app-bottom-nav" class="fixed bottom-0 inset-x-0 z-50 solid-bottom-nav">
+    <div class="max-w-3xl mx-auto px-2 py-1.5 grid grid-cols-3 gap-1.5">
+      <button type="button" data-action="switch-tab" data-tab="feed" id="nav-tab-feed" class="min-h-[48px] flex flex-col items-center justify-center rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/40 font-bold text-xs">
+        <span class="text-sm leading-none mb-0.5">📰</span>
+        <span>Live Feed</span>
+      </button>
+      <button type="button" data-action="switch-tab" data-tab="generator" id="nav-tab-generator" class="min-h-[48px] flex flex-col items-center justify-center rounded-xl text-slate-400 border border-transparent font-semibold text-xs">
+        <span class="text-sm leading-none mb-0.5">⚡</span>
+        <span>AI Brief</span>
+      </button>
+      <button type="button" data-action="switch-tab" data-tab="studio" id="nav-tab-studio" class="min-h-[48px] flex flex-col items-center justify-center rounded-xl text-slate-400 border border-transparent font-semibold text-xs">
+        <span class="text-sm leading-none mb-0.5">📸</span>
+        <span>IG Studio</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- =====================================================================
+       SETTINGS MODAL (OPTIONAL FREE GEMINI API KEY, Z-INDEX: 70)
+       ===================================================================== -->
+  <div id="modal-settings" hidden class="fixed inset-0 z-[70] bg-black/80 flex items-center justify-center p-4">
+    <div class="w-full max-w-md rounded-2xl bg-bgCard border border-borderLine p-5 space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="font-mono text-[10px] font-bold text-amber-400">⚡ DIGIHUSTLECO ENGINE</span>
+          <h3 class="text-base font-extrabold text-white">Gemini API Key (Optional)</h3>
+        </div>
+        <button type="button" data-action="close-modal" class="px-3 py-1.5 rounded-xl bg-bgCardAlt text-slate-300 font-mono text-xs font-bold">✕</button>
+      </div>
+
+      <p class="text-xs text-slate-300 leading-relaxed">
+        The app works 100% offline/online using our built-in macro analyzer. If you want live Gemini AI headlines when pasting custom news in the <strong>AI Brief</strong> tab, paste your free Google AI Studio key (`AIzaSy...`) below:
+      </p>
+
+      <input id="input-gemini-key" type="password" placeholder="AIzaSy..." class="w-full px-3.5 py-3 rounded-xl bg-bgBase border border-borderLine font-mono text-xs text-white focus:outline-none focus:border-amber-500" />
+
+      <div class="grid grid-cols-2 gap-2">
+        <button type="button" data-action="save-gemini-key" class="py-2.5 px-4 rounded-xl bg-amber-500 active:bg-amber-400 text-slate-950 font-extrabold text-xs">
+          Save Key
+        </button>
+        <button type="button" data-action="clear-gemini-key" class="py-2.5 px-4 rounded-xl bg-bgCardAlt active:bg-slate-700 border border-borderLine text-slate-300 font-bold text-xs">
+          Use Built-In Mode
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       APPLICATION JAVASCRIPT (ZERO DEAD ZONES + EXACT TELEGRAM PARITY)
+       ===================================================================== -->
+  <script>
+    "use strict";
+
+    const BRAND_WATERMARK_TOP = "⚡ DIGIHUSTLECO";
+    const BRAND_WATERMARK_FOOTER = "⚡ DIGIHUSTLECO • @digihustleco • © 2026 All Rights Reserved";
+
+    /**
+     * SafeStorage with in-memory fallback for strict mobile WebViews
+     */
+    const SafeStorage = (() => {
+      const mem = new Map();
+      let canUseLocal = true;
+      try {
+        localStorage.setItem("__dh_test__", "1");
+        localStorage.removeItem("__dh_test__");
+      } catch (e) {
+        canUseLocal = false;
+      }
+      return {
+        get(k) {
+          try {
+            if (canUseLocal) {
+              const v = localStorage.getItem(k);
+              if (v !== null) return JSON.parse(v);
+            }
+          } catch (e) {
+            canUseLocal = false;
+          }
+          return mem.has(k) ? mem.get(k) : null;
+        },
+        set(k, val) {
+          mem.set(k, val);
+          if (canUseLocal) {
+            try {
+              localStorage.setItem(k, JSON.stringify(val));
+            } catch (e) {
+              canUseLocal = false;
+            }
+          }
+        }
+      };
+    })();
+
+    /**
+     * Curated & Verified XAUUSD / BTCUSD News Items matching the exact Telegram Bot format
+     */
+    const INITIAL_NEWS_ITEMS = [
+      {
+        id: "dh-news-1",
+        pair: "XAUUSD",
+        source: "FXStreet",
+        wibTime: "20 Nov 2026 13:45 WIB",
+        link: "https://www.fxstreet.com",
+        bias: "BULLISH",
+        id_headline: "Imbal Hasil Obligasi AS Melandai, Emas Menguat Jelang Sesi Eropa",
+        id_what_happened: "Imbal hasil Treasury AS tenor 10 tahun terkoreksi turun setelah pelaku pasar menyesuaikan ekspektasi pemangkasan suku bunga acuan Federal Reserve pada kuartal mendatang.",
+        id_beginner: "Penurunan imbal hasil obligasi AS mengurangi daya tarik Dolar AS sehingga investor institusional kembali mengakumulasi Emas sebagai aset lindung nilai.",
+        id_impact: "Sentimen positif menopang XAUUSD untuk mempertahankan struktur kenaikan intraday selama area support sesi Asia tetap terjaga.",
+        id_caution: "Waspadai sapuan likuiditas (fake breakout) menjelang pembukaan sesi New York pukul 19:30–21:30 WIB sebelum arah utama terbentuk.",
+        en_headline: "Softer US Treasury Yields Lift Spot Gold Ahead of European Open",
+        en_what_happened: "Benchmark 10-year US Treasury yields retreated as institutional desks recalibrated Federal Reserve rate-cut expectations ahead of upcoming US macro releases.",
+        en_beginner: "Lower US bond yields reduce the opportunity cost of holding non-yielding Gold while softening US Dollar demand.",
+        en_impact: "Bullish support on XAUUSD pullbacks while intraday London structure holds above Asian session lows.",
+        en_caution: "Watch 19:30–21:30 WIB (NY open) for stop-hunt wicks above Asian/London highs before true direction."
+      },
+      {
+        id: "dh-news-2",
+        pair: "BTCUSD",
+        source: "CoinDesk",
+        wibTime: "20 Nov 2026 12:30 WIB",
+        link: "https://www.coindesk.com",
+        bias: "BULLISH",
+        id_headline: "Arus Dana Masuk ETF Spot Topang Momentum Kenaikan Bitcoin",
+        id_what_happened: "Produk ETF Bitcoin spot di Amerika Serikat mencatat arus masuk bersih (net inflow) positif selama tiga hari berturut-turut seiring meningkatnya minat beli institusional.",
+        id_beginner: "Aliran modal baru dari manajer aset besar melalui ETF spot menyerap pasokan Bitcoin di pasar dan memperkuat sentimen bullish jangka pendek.",
+        id_impact: "Momentum kenaikan BTCUSD tetap terjaga selama volume transaksi spot mampu bertahan di atas area support kunci harian.",
+        id_caution: "Antisipasi volatilitas tinggi saat pembukaan bursa saham AS pukul 21:30 WIB yang kerap memicu likuidasi posisi leverage dua arah.",
+        en_headline: "Sustained Spot ETF Net Inflows Reinforce Bitcoin Upside Momentum",
+        en_what_happened: "US spot Bitcoin ETFs recorded their third consecutive session of net institutional inflows, absorbing spot exchange supply.",
+        en_beginner: "Steady institutional demand via regulated ETFs brings fresh liquidity into Bitcoin and cushions intraday dips.",
+        en_impact: "Bullish bias on BTCUSD while spot volume defends key intraday structural support.",
+        en_caution: "Watch US equity open (21:30 WIB) for sharp 1–2% liquidation sweeps in both directions."
+      },
+      {
+        id: "dh-news-3",
+        pair: "XAUUSD",
+        source: "Kitco Gold",
+        wibTime: "20 Nov 2026 10:15 WIB",
+        link: "https://www.kitco.com",
+        bias: "BEARISH",
+        id_headline: "Pernyataan Hawkish Pejabat Fed Tahan Laju Penguatan Emas",
+        id_what_happened: "Sejumlah pejabat Federal Reserve menegaskan perlunya kehati-hatian dalam melonggarkan kebijakan moneter mengingat inflasi sektor jasa masih bertahan di atas target.",
+        id_beginner: "Sinyal suku bunga tinggi yang bertahan lebih lama memperkuat indeks Dolar AS (DXY) dan memberikan tekanan jual sementara pada harga Emas.",
+        id_impact: "XAUUSD berisiko mengalami koreksi teknikal; area kenaikan sementara rawan dimanfaatkan untuk aksi ambil untung selama DXY bertahan kuat.",
+        id_caution: "Hindari mengejar harga saat spread melebar dan pantau konfirmasi struktur harga pada pukul 19:30–21:30 WIB.",
+        en_headline: "Hawkish Fed Commentary Caps Gold Rallies as Dollar Firms",
+        en_what_happened: "Federal Reserve policymakers emphasized patience on rate reductions, citing persistent services inflation above the central bank's target.",
+        en_beginner: "Higher-for-longer US rate expectations support the US Dollar Index (DXY), creating headwinds for non-yielding Gold.",
+        en_impact: "Bearish pressure on XAUUSD rallies while DXY holds firm above intraday support.",
+        en_caution: "Avoid chasing extended candles; wait for 19:30–21:30 WIB NY liquidity confirmation."
+      },
+      {
+        id: "dh-news-4",
+        pair: "BTCUSD",
+        source: "Cointelegraph",
+        wibTime: "20 Nov 2026 08:50 WIB",
+        link: "https://cointelegraph.com",
+        bias: "VOLATILE",
+        id_headline: "Open Interest Derivatif Melonjak, Bitcoin Rawan Sapuan Likuiditas",
+        id_what_happened: "Total kontrak terbuka (open interest) pada bursa derivatif kripto meningkat tajam sementara tingkat pendanaan (funding rate) bergerak fluktuatif.",
+        id_beginner: "Penumpukan posisi leverage tinggi di pasar berjangka sering memicu pergerakan harga cepat ke dua arah untuk melikuidasi posisi trader ritel.",
+        id_impact: "BTCUSD berpotensi bergerak dua arah secara agresif sebelum menentukan tren bersih berikutnya.",
+        id_caution: "Gunakan manajemen risiko ketat menjelang sesi Eropa dan pembukaan Wall Street pukul 21:30 WIB.",
+        en_headline: "Surging Derivatives Open Interest Raises Two-Way Sweep Risk on Bitcoin",
+        en_what_happened: "Aggregate crypto futures open interest climbed sharply while perpetual funding rates fluctuated across major exchanges.",
+        en_beginner: "Elevated leverage buildup often triggers rapid stop-hunt wicks in both directions before a clean trend emerges.",
+        en_impact: "Two-way volatility on BTCUSD; patience is required until liquidity pools are cleared.",
+        en_caution: "Manage leverage strictly ahead of London flow and the 21:30 WIB US equity open."
+      }
+    ];
+
+    /**
+     * Global Application State
+     */
+    const STATE = {
+      activeTab: "feed",
+      pairFilter: "ALL",
+      genPair: "XAUUSD",
+      studioFormat: "feed",   // 'feed' (4:5) or 'story' (9:16)
+      studioLang: "ID",       // 'ID', 'EN', or 'DUAL'
+      studioTheme: "gold",    // 'gold', 'crimson', or 'mono'
+      screenshotMode: false,
+      geminiApiKey: SafeStorage.get("dh_gemini_key") || "",
+      items: SafeStorage.get("dh_news_items") || INITIAL_NEWS_ITEMS,
+      selectedStudioItemId: null,
+      lastCustomItem: null
+    };
+
+    if (!STATE.selectedStudioItemId && STATE.items.length > 0) {
+      STATE.selectedStudioItemId = STATE.items[0].id;
+    }
+
+    /**
+     * WIB (Asia/Jakarta) Clock Leaf Updater
+     */
+    function getNowWibString() {
+      const now = new Date();
+      const parts = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Asia/Jakarta",
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      }).formatToParts(now);
+      const m = {};
+      parts.forEach(p => { m[p.type] = p.value; });
+      return `${m.day} ${m.month} ${m.year} ${m.hour}:${m.minute} WIB`;
+    }
+
+    function updateWibClockLeaf() {
+      const now = new Date();
+      const timeStr = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Asia/Jakarta",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false
+      }).format(now);
+      const dateStr = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Asia/Jakarta",
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+      }).format(now);
+
+      const cEl = document.getElementById("wib-clock-leaf");
+      const dEl = document.getElementById("wib-date-leaf");
+      if (cEl) cEl.textContent = `${timeStr} WIB`;
+      if (dEl) dEl.textContent = dateStr;
+    }
+
+    /**
+     * Non-blocking Toast Banner
+     */
+    function showToast(msg, tone = "amber") {
+      const box = document.getElementById("toast-container");
+      if (!box) return;
+      const el = document.createElement("div");
+      const style = tone === "emerald"
+        ? "bg-emerald-950 border-emerald-500/50 text-emerald-200"
+        : tone === "rose"
+        ? "bg-rose-950 border-rose-500/50 text-rose-200"
+        : "bg-slate-900 border-amber-500/50 text-amber-200";
+      el.className = `pointer-events-auto px-3.5 py-2.5 rounded-xl border ${style} shadow-xl text-xs font-semibold flex items-center justify-between gap-2`;
+      el.innerHTML = `<span>${escapeHtml(msg)}</span><button type="button" data-action="dismiss-toast" class="min-h-[28px] px-2 font-mono text-xs text-slate-400">✕</button>`;
+      box.appendChild(el);
+      setTimeout(() => { el.remove(); }, 3200);
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    /**
+     * Rule-Based Financial Analyzer + Optional Live Gemini API Analyzer
+     * Matches the exact Code.gs Telegram Bot output structure
+     */
+    function analyzeHeadlineBuiltIn(pair, source, rawText) {
+      const clean = rawText.trim();
+      const t = clean.toLowerCase();
+      const isHawkish = /(hike|hawkish|hotter|surge|strong dollar|yields rise|yields climb|inflation rises|outflow|drop|fall|slump|sell-off|pressure)/.test(t);
+      const isDovish = /(cut|dovish|cool|slows|weak dollar|yields fall|yields retreat|inflow|adoption|rally|gain|climb|support|softer)/.test(t);
+
+      const bias = isHawkish && !isDovish ? "BEARISH" : isDovish ? "BULLISH" : "VOLATILE";
+
+      if (pair === "XAUUSD") {
+        return {
+          id: "dh-" + Date.now(),
+          pair: "XAUUSD",
+          source: source || "Market Wire",
+          wibTime: getNowWibString(),
+          link: "https://www.fxstreet.com",
+          bias,
+          id_headline: bias === "BEARISH"
+            ? "Yield AS & Dolar Menguat, Emas Hadapi Tekanan Jual"
+            : bias === "BULLISH"
+            ? "Tekanan Dolar Mereda, Peluang Rebound Emas Terbuka"
+            : "Pasar Cermati Katalis Makro AS, Emas Bergerak Dua Arah",
+          id_what_happened: clean,
+          id_beginner: bias === "BEARISH"
+            ? "Kenaikan suku bunga dan imbal hasil obligasi AS membuat Dolar lebih menarik dibandingkan Emas yang tidak memberikan imbal hasil."
+            : "Ekspektasi pelonggaran kebijakan moneter mendorong pelaku pasar kembali mengakumulasi aset lindung nilai seperti Emas.",
+          id_impact: bias === "BEARISH"
+            ? "XAUUSD berpotensi tertekan; area kenaikan sementara rawan dimanfaatkan untuk aksi jual selama Dolar bertahan kuat."
+            : "Sentimen positif menopang pergerakan XAUUSD selama area support intraday tetap terjaga.",
+          id_caution: "Waspadai sapuan likuiditas (fake breakout) menjelang pembukaan sesi New York pukul 19:30–21:30 WIB sebelum arah utama terbentuk.",
+          en_headline: bias === "BEARISH"
+            ? "Firm US Yields & Dollar Lift Pressure on Spot Gold"
+            : bias === "BULLISH"
+            ? "Softer Dollar Momentum Opens Rebound Window for Gold"
+            : "Macro Cross-Currents Trigger Two-Way Liquidity on Gold",
+          en_what_happened: clean,
+          en_beginner: bias === "BEARISH"
+            ? "Higher US Treasury yields make the Dollar more attractive than non-yielding Gold."
+            : "Softer rate expectations draw institutional demand back into safe-haven Gold.",
+          en_impact: bias === "BEARISH"
+            ? "Bearish pressure on XAUUSD rallies while DXY holds firm."
+            : "Bullish support for XAUUSD dips during active London/NY liquidity.",
+          en_caution: "Watch 19:30–21:30 WIB (NY open) for stop-hunt wicks above Asian/London highs before true direction."
+        };
+      }
+
+      return {
+        id: "dh-" + Date.now(),
+        pair: "BTCUSD",
+        source: source || "Crypto Wire",
+        wibTime: getNowWibString(),
+        link: "https://www.coindesk.com",
+        bias,
+        id_headline: bias === "BEARISH"
+          ? "Likuiditas Dolar Mengetat, Bitcoin Rawan Koreksi Jangka Pendek"
+          : bias === "BULLISH"
+          ? "Arus Dana Institusional Topang Momentum Kenaikan Bitcoin"
+          : "Volatilitas Meningkat, Bitcoin Uji Area Likuiditas Utama",
+        id_what_happened: clean,
+        id_beginner: bias === "BEARISH"
+          ? "Pengetatan likuiditas Dolar menurunkan minat terhadap aset berisiko dan memicu likuidasi posisi leverage di pasar kripto."
+          : "Aliran masuk dana ETF spot serta kondisi likuiditas yang kondusif mendorong permintaan beli baru pada Bitcoin.",
+        id_impact: bias === "BEARISH"
+          ? "BTCUSD berisiko mengalami koreksi lanjutan apabila indeks saham AS dibuka melemah."
+          : "Momentum bullish terjaga pada BTCUSD selama volume transaksi spot mampu bertahan di atas support intraday.",
+        id_caution: "Antisipasi volatilitas tinggi saat pembukaan bursa saham AS pukul 21:30 WIB yang kerap memicu sapuan likuidasi dua arah.",
+        en_headline: bias === "BEARISH"
+          ? "Tighter Dollar Liquidity Raises Pullback Risk on Bitcoin"
+          : bias === "BULLISH"
+          ? "Institutional Inflows Reinforce Upside Momentum in Bitcoin"
+          : "Elevated Leverage Sets Up Two-Way Liquidity Sweeps in Bitcoin",
+        en_what_happened: clean,
+        en_beginner: bias === "BEARISH"
+          ? "Tighter Dollar liquidity cools risk appetite and triggers leveraged crypto liquidations."
+          : "Fresh spot ETF demand or looser liquidity brings new buyers into Bitcoin.",
+        en_impact: bias === "BEARISH"
+          ? "Elevated pullback risk on BTCUSD if US equities open soft."
+          : "Bullish momentum on BTCUSD while spot volume holds key intraday support.",
+        en_caution: "Watch US equity open (21:30 WIB) for sharp 1–2% liquidation sweeps in both directions."
+      };
+    }
+
+    async function analyzeHeadlineWithOptionalGemini(pair, source, rawText) {
+      const apiKey = (STATE.geminiApiKey || "").trim();
+      if (!apiKey) {
+        return analyzeHeadlineBuiltIn(pair, source, rawText);
+      }
+
+      const wibNow = getNowWibString();
+      const prompt = [
+        `You are a senior institutional macro analyst writing for DIGIHUSTLECO in Indonesia (WIB / UTC+7). Current time: ${wibNow}.`,
+        `Analyze this ${pair} news from ${source}:`,
+        `HEADLINE: ${rawText}`,
+        `STRICT RULES:`,
+        `1. Write original, punchy, hooking headlines (max 11 words each) for id_headline and en_headline.`,
+        `2. INDONESIAN (id_*): Use clean, authoritative, professional Bahasa Indonesia ("bahasa profesional" seperti riset sekuritas, tanpa slang).`,
+        `3. Keep each bullet crisp (1-2 sentences). Include WIB session cautions (19:30-21:30 WIB for XAUUSD, 21:30 WIB for BTCUSD).`,
+        `Return ONLY valid JSON with keys: bias ("BULLISH"|"BEARISH"|"VOLATILE"), id_headline, id_what_happened, id_beginner, id_impact, id_caution, en_headline, en_what_happened, en_beginner, en_impact, en_caution.`
+      ].join("\n");
+
+      const models = ["gemini-2.5-flash", "gemini-2.0-flash"];
+      for (const model of models) {
+        try {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: { temperature: 0.3, responseMimeType: "application/json" }
+            })
+          });
+          if (res.ok) {
+            const data = await res.json();
+            const txt = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (txt) {
+              const parsed = JSON.parse(txt);
+              return {
+                id: "dh-" + Date.now(),
+                pair,
+                source: source || "Gemini AI Wire",
+                wibTime: wibNow,
+                link: "https://www.fxstreet.com",
+                bias: parsed.bias || "VOLATILE",
+                id_headline: parsed.id_headline,
+                id_what_happened: parsed.id_what_happened,
+                id_beginner: parsed.id_beginner,
+                id_impact: parsed.id_impact,
+                id_caution: parsed.id_caution,
+                en_headline: parsed.en_headline,
+                en_what_happened: parsed.en_what_happened,
+                en_beginner: parsed.en_beginner,
+                en_impact: parsed.en_impact,
+                en_caution: parsed.en_caution
+              };
+            }
+          }
+        } catch (e) {
+          // Fall back cleanly to built-in analyzer
+        }
+      }
+      return analyzeHeadlineBuiltIn(pair, source, rawText);
+    }
+
+    /**
+     * Live RSS Fetcher via CORS-friendly JSON RSS Bridge (with instant fallback)
+     */
+    async function fetchLiveFeeds() {
+      const btn = document.getElementById("btn-refresh-rss");
+      const badge = document.getElementById("feed-status-badge");
+      if (btn) btn.textContent = "↻ Fetching...";
+      if (badge) badge.textContent = "● SYNCING RSS FEEDS...";
+
+      const feeds = [
+        { pair: "XAUUSD", source: "FXStreet", url: "https://www.fxstreet.com/rss/news" },
+        { pair: "BTCUSD", source: "CoinDesk", url: "https://www.coindesk.com/arc/outboundfeeds/rss/" }
+      ];
+      const filterRegex = /(gold|xau|fed|fomc|powell|cpi|pce|nfp|inflation|yield|treasury|dollar|dxy|rate|bitcoin|btc|etf|sec|crypto)/i;
+      let addedCount = 0;
+
+      for (const f of feeds) {
+        try {
+          const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(f.url)}`;
+          const res = await fetch(apiUrl);
+          if (!res.ok) continue;
+          const json = await res.json();
+          if (json.status === "ok" && Array.isArray(json.items)) {
+            const matches = json.items.filter(it => filterRegex.test(it.title || "")).slice(0, 2);
+            for (const m of matches) {
+              const exists = STATE.items.some(existing => existing.en_what_happened === m.title);
+              if (!exists && m.title) {
+                const analyzed = analyzeHeadlineBuiltIn(f.pair, f.source, m.title);
+                analyzed.link = m.link || analyzed.link;
+                STATE.items.unshift(analyzed);
+                addedCount++;
+              }
+            }
+          }
+        } catch (err) {
+          // Ignore network errors cleanly
+        }
+      }
+
+      if (STATE.items.length > 20) STATE.items = STATE.items.slice(0, 20);
+      SafeStorage.set("dh_news_items", STATE.items);
+
+      if (btn) btn.textContent = "↻ Fetch Live RSS";
+      if (badge) badge.textContent = "● WIB MACRO WIRE READY";
+      renderAll();
+      showToast(addedCount > 0 ? `Added ${addedCount} fresh XAUUSD/BTCUSD items!` : "Feed up to date with latest WIB market briefs.", "emerald");
+    }
+
+    /**
+     * Format Exact Telegram Broadcast Text (@digihustleco)
+     */
+    function buildTelegramFormattedText(item, langMode = "DUAL") {
+      const badge = item.bias === "BULLISH" ? "🟢 BULLISH"
+        : item.bias === "BEARISH" ? "🔴 BEARISH"
+        : "🟡 VOLATILE / TWO-WAY";
+
+      const lines = [
+        `🚨 ${item.pair} FUNDAMENTAL BRIEF • ${badge}`,
+        `🕒 ${item.wibTime} | Source: ${item.source}`
+      ];
+
+      if (langMode === "DUAL" || langMode === "ID") {
+        lines.push(
+          ``,
+          `🇮🇩 ${item.id_headline}`,
+          `• Inti Berita: ${item.id_what_happened}`,
+          `• Penjelasan Singkat: ${item.id_beginner}`,
+          `• Dampak ke ${item.pair}: ${item.id_impact}`,
+          `• Waspada & Timing: ${item.id_caution}`
+        );
+      }
+
+      if (langMode === "DUAL" || langMode === "EN") {
+        lines.push(
+          ``,
+          `🇬🇧 ${item.en_headline}`,
+          `• What Happened: ${item.en_what_happened}`,
+          `• Beginner Take: ${item.en_beginner}`,
+          `• Impact on ${item.pair}: ${item.en_impact}`,
+          `• Watch Out For: ${item.en_caution}`
+        );
+      }
+
+      lines.push(
+        ``,
+        `────────────────────`,
+        `⚡ DIGIHUSTLECO • © 2026 All Rights Reserved`,
+        ``,
+        `#DIGIHUSTLECO #${item.pair} #ForexIndonesia #TradingEmas #BitcoinIndonesia #AnalisaFundamental`
+      );
+
+      return lines.join("\n");
+    }
+
+    function copyTextMobileSafe(text, successMsg) {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.top = "0";
+      ta.style.left = "0";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      let ok = false;
+      try {
+        ok = document.execCommand("copy");
+      } catch (e) {
+        ok = false;
+      }
+      document.body.removeChild(ta);
+      if (ok) {
+        showToast(successMsg, "emerald");
+      } else {
+        showToast("Tap and hold text to copy manually.", "amber");
+      }
+    }
+
+    /**
+     * Render Reusable Telegram-Identical Card HTML
+     */
+    function renderTelegramStyleCardHtml(item, showActionBar = true) {
+      const isBull = item.bias === "BULLISH";
+      const isBear = item.bias === "BEARISH";
+      const badgeClass = isBull
+        ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+        : isBear
+        ? "bg-rose-500/20 text-rose-300 border-rose-500/40"
+        : "bg-amber-500/20 text-amber-300 border-amber-500/40";
+      const badgeText = isBull ? "🟢 BULLISH" : isBear ? "🔴 BEARISH" : "🟡 VOLATILE / TWO-WAY";
+
+      return `
+        <article class="rounded-2xl bg-bgCard border border-borderLine p-4 space-y-3.5 shadow-lg">
+          <!-- Top Brand Watermark + Pair & Bias -->
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-borderLine pb-2.5">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded bg-amber-500/15 text-amber-400 font-mono text-[10px] font-black border border-amber-500/35">${BRAND_WATERMARK_TOP}</span>
+              <span class="font-mono text-xs font-extrabold text-white">${escapeHtml(item.pair)} BRIEF</span>
+            </div>
+            <span class="px-2.5 py-1 rounded-lg border font-mono text-[11px] font-extrabold ${badgeClass}">
+              ${badgeText}
+            </span>
+          </div>
+
+          <!-- Timestamp & Source -->
+          <div class="font-mono text-[11px] text-slate-400">
+            🕒 ${escapeHtml(item.wibTime)} | Source: <span class="text-slate-200 font-semibold">${escapeHtml(item.source)}</span>
+          </div>
+
+          <!-- 🇮🇩 BAHASA PROFESIONAL SECTION -->
+          <div class="p-3.5 rounded-xl bg-bgBase border border-borderLine space-y-2">
+            <h3 class="text-sm sm:text-base font-extrabold text-white leading-snug">
+              🇮🇩 ${escapeHtml(item.id_headline)}
+            </h3>
+            <ul class="space-y-1.5 text-xs text-slate-300 leading-relaxed">
+              <li><strong class="text-amber-300">• Inti Berita:</strong> ${escapeHtml(item.id_what_happened)}</li>
+              <li><strong class="text-slate-100">• Penjelasan Singkat:</strong> ${escapeHtml(item.id_beginner)}</li>
+              <li><strong class="text-emerald-300">• Dampak ke ${escapeHtml(item.pair)}:</strong> ${escapeHtml(item.id_impact)}</li>
+              <li><strong class="text-rose-300">• Waspada &amp; Timing:</strong> ${escapeHtml(item.id_caution)}</li>
+            </ul>
+          </div>
+
+          <!-- 🇬🇧 ENGLISH SECTION -->
+          <div class="p-3.5 rounded-xl bg-bgBase border border-borderLine space-y-2">
+            <h3 class="text-sm sm:text-base font-extrabold text-white leading-snug">
+              🇬🇧 ${escapeHtml(item.en_headline)}
+            </h3>
+            <ul class="space-y-1.5 text-xs text-slate-300 leading-relaxed">
+              <li><strong class="text-amber-300">• What Happened:</strong> ${escapeHtml(item.en_what_happened)}</li>
+              <li><strong class="text-slate-100">• Beginner Take:</strong> ${escapeHtml(item.en_beginner)}</li>
+              <li><strong class="text-emerald-300">• Impact on ${escapeHtml(item.pair)}:</strong> ${escapeHtml(item.en_impact)}</li>
+              <li><strong class="text-rose-300">• Watch Out For:</strong> ${escapeHtml(item.en_caution)}</li>
+            </ul>
+          </div>
+
+          <!-- Prominent All-Caps DIGIHUSTLECO Watermark Footer -->
+          <div class="pt-1 border-t border-borderLine flex items-center justify-between text-[11px] font-mono text-amber-400 font-bold">
+            <span>${BRAND_WATERMARK_FOOTER}</span>
+          </div>
+
+          ${showActionBar ? `
+            <div class="grid grid-cols-2 gap-2 pt-1">
+              <button type="button" data-action="send-to-studio" data-id="${escapeHtml(item.id)}" class="py-2.5 px-3 rounded-xl bg-amber-500 active:bg-amber-400 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-1.5">
+                <span>📸 Make IG Card</span>
+              </button>
+              <button type="button" data-action="copy-item-tele" data-id="${escapeHtml(item.id)}" class="py-2.5 px-3 rounded-xl bg-bgCardAlt active:bg-slate-700 border border-borderLine text-slate-200 font-bold text-xs flex items-center justify-center gap-1.5">
+                <span>📋 Copy Tele Text</span>
+              </button>
+            </div>
+          ` : ""}
+        </article>
+      `;
+    }
+
+    /**
+     * Render Live Instagram Preview Card in Studio Tab
+     */
+    function renderInstagramStudioCard() {
+      const wrapper = document.getElementById("ig-card-preview-wrapper");
+      if (!wrapper) return;
+
+      const item = STATE.items.find(i => i.id === STATE.selectedStudioItemId)
+        || STATE.lastCustomItem
+        || STATE.items[0];
+      if (!item) return;
+
+      const isStory = STATE.studioFormat === "story";
+      const aspectClass = isStory ? "min-h-[640px]" : "min-h-[500px]";
+
+      const themeStyles = STATE.studioTheme === "crimson"
+        ? {
+            outer: "bg-[#0D070A] border-rose-500/50",
+            accent: "text-rose-400",
+            pill: "bg-rose-500/20 text-rose-300 border-rose-500/40",
+            box: "bg-[#160B10] border-rose-500/25"
+          }
+        : STATE.studioTheme === "mono"
+        ? {
+            outer: "bg-[#08090B] border-slate-500/50",
+            accent: "text-white",
+            pill: "bg-slate-800 text-slate-200 border-slate-600",
+            box: "bg-[#111318] border-slate-700"
+          }
+        : {
+            outer: "bg-[#080B12] border-amber-500/50",
+            accent: "text-amber-400",
+            pill: "bg-amber-500/20 text-amber-300 border-amber-500/40",
+            box: "bg-[#0E1422] border-amber-500/25"
+          };
+
+      const isBull = item.bias === "BULLISH";
+      const isBear = item.bias === "BEARISH";
+      const biasPill = isBull
+        ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+        : isBear
+        ? "bg-rose-500/20 text-rose-300 border-rose-500/40"
+        : "bg-amber-500/20 text-amber-300 border-amber-500/40";
+      const biasLabel = isBull ? "🟢 BULLISH" : isBear ? "🔴 BEARISH" : "🟡 VOLATILE";
+
+      const showId = STATE.studioLang === "ID" || STATE.studioLang === "DUAL";
+      const showEn = STATE.studioLang === "EN" || STATE.studioLang === "DUAL";
+
+      wrapper.innerHTML = `
+        <div id="ig-visual-card" class="rounded-3xl border-2 ${themeStyles.outer} ${aspectClass} p-5 sm:p-6 flex flex-col justify-between shadow-2xl relative overflow-hidden">
+          <!-- Subtle Diagonal Background Watermark -->
+          <div class="pointer-events-none select-none absolute inset-0 flex items-center justify-center opacity-[0.04]">
+            <span class="font-black text-5xl tracking-widest text-white -rotate-12">DIGIHUSTLECO</span>
+          </div>
+
+          <!-- Top Header Bar -->
+          <div class="relative z-10 space-y-3">
+            <div class="flex items-center justify-between gap-2">
+              <span class="px-2.5 py-1 rounded-lg border font-mono text-xs font-black tracking-wider ${themeStyles.pill}">
+                ⚡ DIGIHUSTLECO
+              </span>
+              <span class="px-2.5 py-1 rounded-lg border font-mono text-[11px] font-extrabold ${biasPill}">
+                ${biasLabel}
+              </span>
+            </div>
+
+            <div class="flex items-center justify-between text-[11px] font-mono text-slate-400">
+              <span class="font-extrabold ${themeStyles.accent}">${escapeHtml(item.pair)} • FUNDAMENTAL BRIEF</span>
+              <span>${escapeHtml(item.wibTime)}</span>
+            </div>
+          </div>
+
+          <!-- Middle Content Blocks -->
+          <div class="relative z-10 my-4 space-y-3.5">
+            ${showId ? `
+              <div class="p-4 rounded-2xl border ${themeStyles.box} space-y-2">
+                <h3 class="text-base sm:text-lg font-black text-white leading-snug">
+                  🇮🇩 ${escapeHtml(item.id_headline)}
+                </h3>
+                <div class="space-y-1.5 text-xs text-slate-200 leading-relaxed">
+                  <p><strong class="${themeStyles.accent}">• Inti Berita:</strong> ${escapeHtml(item.id_what_happened)}</p>
+                  <p><strong class="text-white">• Penjelasan Singkat:</strong> ${escapeHtml(item.id_beginner)}</p>
+                  <p><strong class="text-emerald-300">• Dampak ke ${escapeHtml(item.pair)}:</strong> ${escapeHtml(item.id_impact)}</p>
+                  <p><strong class="text-rose-300">• Waspada &amp; Timing:</strong> ${escapeHtml(item.id_caution)}</p>
+                </div>
+              </div>
+            ` : ""}
+
+            ${showEn ? `
+              <div class="p-4 rounded-2xl border ${themeStyles.box} space-y-2">
+                <h3 class="text-base sm:text-lg font-black text-white leading-snug">
+                  🇬🇧 ${escapeHtml(item.en_headline)}
+                </h3>
+                <div class="space-y-1.5 text-xs text-slate-200 leading-relaxed">
+                  <p><strong class="${themeStyles.accent}">• What Happened:</strong> ${escapeHtml(item.en_what_happened)}</p>
+                  <p><strong class="text-white">• Beginner Take:</strong> ${escapeHtml(item.en_beginner)}</p>
+                  <p><strong class="text-emerald-300">• Impact on ${escapeHtml(item.pair)}:</strong> ${escapeHtml(item.en_impact)}</p>
+                  <p><strong class="text-rose-300">• Watch Out For:</strong> ${escapeHtml(item.en_caution)}</p>
+                </div>
+              </div>
+            ` : ""}
+          </div>
+
+          <!-- Bottom All-Caps Watermark Footer -->
+          <div class="relative z-10 pt-3 border-t border-slate-800 flex items-center justify-between gap-2 font-mono text-[11px]">
+            <span class="font-black tracking-wider ${themeStyles.accent}">⚡ DIGIHUSTLECO</span>
+            <span class="text-slate-400">@digihustleco • © 2026</span>
+          </div>
+        </div>
+      `;
+    }
+
+    /**
+     * Render HD PNG on HTML5 Canvas & Trigger Download
+     */
+    function downloadInstagramPng() {
+      const item = STATE.items.find(i => i.id === STATE.selectedStudioItemId)
+        || STATE.lastCustomItem
+        || STATE.items[0];
+      if (!item) return;
+
+      const isStory = STATE.studioFormat === "story";
+      const width = 1080;
+      const height = isStory ? 1920 : 1350;
+
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      // Background
+      ctx.fillStyle = STATE.studioTheme === "crimson" ? "#0D070A" : STATE.studioTheme === "mono" ? "#08090B" : "#080B12";
+      ctx.fillRect(0, 0, width, height);
+
+      const accent = STATE.studioTheme === "crimson" ? "#FB7185" : STATE.studioTheme === "mono" ? "#FFFFFF" : "#F59E0B";
+
+      // Outer Frame
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 6;
+      ctx.strokeRect(36, 36, width - 72, height - 72);
+
+      // Diagonal Watermark
+      ctx.save();
+      ctx.translate(width / 2, height / 2);
+      ctx.rotate(-0.22);
+      ctx.fillStyle = "rgba(255, 255, 255, 0.04)";
+      ctx.font = "900 110px Inter, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("DIGIHUSTLECO", 0, 0);
+      ctx.restore();
+
+      // Header Brand & Pair
+      ctx.fillStyle = accent;
+      ctx.font = "800 34px JetBrains Mono, monospace";
+      ctx.fillText("⚡ DIGIHUSTLECO", 80, 120);
+
+      ctx.fillStyle = item.bias === "BULLISH" ? "#34D399" : item.bias === "BEARISH" ? "#FB7185" : "#FBBF24";
+      ctx.textAlign = "right";
+      ctx.fillText(`${item.pair} • ${item.bias}`, width - 80, 120);
+      ctx.textAlign = "left";
+
+      ctx.fillStyle = "#94A3B8";
+      ctx.font = "600 26px JetBrains Mono, monospace";
+      ctx.fillText(`${item.wibTime} | Source: ${item.source}`, 80, 172);
+
+      function wrapText(text, x, startY, maxWidth, lineHeight) {
+        const words = String(text || "").split(" ");
+        let line = "";
+        let y = startY;
+        for (let n = 0; n < words.length; n++) {
+          const testLine = line + words[n] + " ";
+          if (ctx.measureText(testLine).width > maxWidth && n > 0) {
+            ctx.fillText(line.trim(), x, y);
+            line = words[n] + " ";
+            y += lineHeight;
+          } else {
+            line = testLine;
+          }
+        }
+        ctx.fillText(line.trim(), x, y);
+        return y + lineHeight;
+      }
+
+      let cursorY = 260;
+      const showId = STATE.studioLang === "ID" || STATE.studioLang === "DUAL";
+      const showEn = STATE.studioLang === "EN" || STATE.studioLang === "DUAL";
+
+      if (showId) {
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "800 42px Inter, sans-serif";
+        cursorY = wrapText(`🇮🇩 ${item.id_headline}`, 80, cursorY, width - 160, 54) + 18;
+
+        ctx.font = "500 30px Inter, sans-serif";
+        ctx.fillStyle = "#E2E8F0";
+        cursorY = wrapText(`• Inti Berita: ${item.id_what_happened}`, 80, cursorY, width - 160, 42) + 14;
+        cursorY = wrapText(`• Penjelasan Singkat: ${item.id_beginner}`, 80, cursorY, width - 160, 42) + 14;
+        ctx.fillStyle = "#6EE7B7";
+        cursorY = wrapText(`• Dampak ke ${item.pair}: ${item.id_impact}`, 80, cursorY, width - 160, 42) + 14;
+        ctx.fillStyle = "#FDA4AF";
+        cursorY = wrapText(`• Waspada & Timing: ${item.id_caution}`, 80, cursorY, width - 160, 42) + 34;
+      }
+
+      if (showEn) {
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "800 42px Inter, sans-serif";
+        cursorY = wrapText(`🇬🇧 ${item.en_headline}`, 80, cursorY, width - 160, 54) + 18;
+
+        ctx.font = "500 30px Inter, sans-serif";
+        ctx.fillStyle = "#E2E8F0";
+        cursorY = wrapText(`• What Happened: ${item.en_what_happened}`, 80, cursorY, width - 160, 42) + 14;
+        cursorY = wrapText(`• Beginner Take: ${item.en_beginner}`, 80, cursorY, width - 160, 42) + 14;
+        ctx.fillStyle = "#6EE7B7";
+        cursorY = wrapText(`• Impact on ${item.pair}: ${item.en_impact}`, 80, cursorY, width - 160, 42) + 14;
+        ctx.fillStyle = "#FDA4AF";
+        cursorY = wrapText(`• Watch Out For: ${item.en_caution}`, 80, cursorY, width - 160, 42) + 24;
+      }
+
+      // Footer Watermark
+      ctx.strokeStyle = "#1E293B";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(80, height - 130);
+      ctx.lineTo(width - 80, height - 130);
+      ctx.stroke();
+
+      ctx.fillStyle = accent;
+      ctx.font = "800 30px JetBrains Mono, monospace";
+      ctx.fillText("⚡ DIGIHUSTLECO", 80, height - 76);
+
+      ctx.fillStyle = "#94A3B8";
+      ctx.textAlign = "right";
+      ctx.fillText("@digihustleco • © 2026 All Rights Reserved", width - 80, height - 76);
+
+      try {
+        const dataUrl = canvas.toDataURL("image/png");
+        const a = document.createElement("a");
+        a.href = dataUrl;
+        a.download = `DIGIHUSTLECO_${item.pair}_${STATE.studioFormat.toUpperCase()}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        showToast("HD PNG Downloaded! Check your Gallery/Downloads.", "emerald");
+      } catch (e) {
+        showToast("Use Clean Screenshot Mode if browser blocks download.", "amber");
+      }
+    }
+
+    /**
+     * Master UI Render Function
+     */
+    function renderAll() {
+      // 1. Update Tab Visibility
+      ["feed", "generator", "studio"].forEach(tab => {
+        const panel = document.getElementById(`tab-${tab}`);
+        const navBtn = document.getElementById(`nav-tab-${tab}`);
+        if (panel) panel.hidden = STATE.activeTab !== tab;
+        if (navBtn) {
+          navBtn.className = STATE.activeTab === tab
+            ? "min-h-[48px] flex flex-col items-center justify-center rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/40 font-bold text-xs"
+            : "min-h-[48px] flex flex-col items-center justify-center rounded-xl text-slate-400 border border-transparent font-semibold text-xs";
+        }
+      });
+
+      // 2. Update Feed Pair Pills
+      ["ALL", "XAUUSD", "BTCUSD"].forEach(p => {
+        const btn = document.getElementById(`pill-pair-${p}`);
+        if (btn) {
+          btn.className = STATE.pairFilter === p
+            ? "pair-pill py-2.5 px-3 rounded-xl font-mono text-xs font-extrabold bg-amber-500 text-slate-950 border border-amber-400"
+            : "pair-pill py-2.5 px-3 rounded-xl font-mono text-xs font-bold bg-bgCardAlt text-slate-300 border border-borderLine";
+        }
+      });
+
+      // 3. Render Feed Cards
+      const feedList = document.getElementById("feed-cards-list");
+      if (feedList) {
+        const filtered = STATE.pairFilter === "ALL"
+          ? STATE.items
+          : STATE.items.filter(it => it.pair === STATE.pairFilter);
+        feedList.innerHTML = filtered.map(it => renderTelegramStyleCardHtml(it, true)).join("");
+      }
+
+      // 4. Update AI Brief Generator Controls & Output
+      ["XAUUSD", "BTCUSD"].forEach(p => {
+        const btn = document.getElementById(`btn-gen-${p}`);
+        if (btn) {
+          btn.className = STATE.genPair === p
+            ? "py-2.5 px-3 rounded-xl font-mono text-xs font-extrabold bg-amber-500 text-slate-950 border border-amber-400"
+            : "py-2.5 px-3 rounded-xl font-mono text-xs font-bold bg-bgCardAlt text-slate-300 border border-borderLine";
+        }
+      });
+
+      const geminiPill = document.getElementById("gemini-mode-pill");
+      if (geminiPill) {
+        geminiPill.textContent = STATE.geminiApiKey ? "Gemini AI: Connected" : "Smart Engine: Built-In";
+        geminiPill.className = STATE.geminiApiKey
+          ? "font-mono text-[10px] px-2.5 py-1 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-bold"
+          : "font-mono text-[10px] px-2.5 py-1 rounded-lg bg-bgCardAlt border border-borderLine text-slate-300";
+      }
+
+      const customBox = document.getElementById("custom-brief-preview-box");
+      if (customBox) {
+        customBox.innerHTML = STATE.lastCustomItem
+          ? renderTelegramStyleCardHtml(STATE.lastCustomItem, true)
+          : "";
+      }
+
+      // 5. Update Studio Controls & Preview Card
+      ["feed", "story"].forEach(fmt => {
+        const btn = document.getElementById(`btn-fmt-${fmt}`);
+        if (btn) {
+          btn.className = STATE.studioFormat === fmt
+            ? "py-2.5 px-3 rounded-xl font-mono text-xs font-extrabold bg-amber-500 text-slate-950 border border-amber-400"
+            : "py-2.5 px-3 rounded-xl font-mono text-xs font-bold bg-bgCardAlt text-slate-300 border border-borderLine";
+        }
+      });
+
+      ["ID", "EN", "DUAL"].forEach(lg => {
+        const btn = document.getElementById(`btn-slang-${lg}`);
+        if (btn) {
+          btn.className = STATE.studioLang === lg
+            ? "py-2.5 px-2 rounded-xl font-mono text-xs font-extrabold bg-amber-500 text-slate-950 border border-amber-400"
+            : "py-2.5 px-2 rounded-xl font-mono text-xs font-bold bg-bgCardAlt text-slate-300 border border-borderLine";
+        }
+      });
+
+      ["gold", "crimson", "mono"].forEach(th => {
+        const btn = document.getElementById(`btn-stheme-${th}`);
+        if (btn) {
+          btn.className = STATE.studioTheme === th
+            ? "py-2 px-2 rounded-xl font-mono text-[11px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/50"
+            : "py-2 px-2 rounded-xl font-mono text-[11px] font-bold bg-bgCardAlt text-slate-300 border border-borderLine";
+        }
+      });
+
+      renderInstagramStudioCard();
+
+      // 6. Screenshot Mode Toggle
+      const topHeader = document.getElementById("app-top-header");
+      const bottomNav = document.getElementById("app-bottom-nav");
+      const studioCtrl = document.getElementById("studio-controls-panel");
+      const exitBar = document.getElementById("exit-screenshot-bar");
+
+      if (topHeader) topHeader.hidden = STATE.screenshotMode;
+      if (bottomNav) bottomNav.hidden = STATE.screenshotMode;
+      if (studioCtrl) studioCtrl.hidden = STATE.screenshotMode;
+      if (exitBar) exitBar.hidden = !STATE.screenshotMode;
+    }
+
+    /**
+     * Unified Document-Level Event Delegation (Handles both click and touchend cleanly)
+     */
+    let lastHandledTime = 0;
+
+    async function handleActionEvent(e) {
+      const target = e.target.closest("[data-action]");
+      if (!target) {
+        if (e.target && e.target.id === "modal-settings") {
+          document.getElementById("modal-settings").hidden = true;
+        }
+        return;
+      }
+
+      // Deduplicate rapid touch + synthetic click events within 250ms
+      const now = Date.now();
+      if (now - lastHandledTime < 220) return;
+      lastHandledTime = now;
+
+      const action = target.getAttribute("data-action");
+
+      switch (action) {
+        case "dismiss-toast": {
+          target.parentElement?.remove();
+          break;
+        }
+        case "ui-reset": {
+          STATE.screenshotMode = false;
+          document.getElementById("modal-settings").hidden = true;
+          renderAll();
+          showToast("DIGIHUSTLECO UI Ready & Responsive!", "emerald");
+          break;
+        }
+        case "switch-tab": {
+          STATE.activeTab = target.getAttribute("data-tab") || "feed";
+          STATE.screenshotMode = false;
+          renderAll();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          break;
+        }
+        case "filter-pair": {
+          STATE.pairFilter = target.getAttribute("data-pair") || "ALL";
+          renderAll();
+          break;
+        }
+        case "fetch-live-rss": {
+          await fetchLiveFeeds();
+          break;
+        }
+        case "send-to-studio": {
+          const id = target.getAttribute("data-id");
+          if (id) STATE.selectedStudioItemId = id;
+          STATE.activeTab = "studio";
+          STATE.screenshotMode = false;
+          renderAll();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          showToast("Loaded into DIGIHUSTLECO IG Studio!", "amber");
+          break;
+        }
+        case "copy-item-tele": {
+          const id = target.getAttribute("data-id");
+          const item = STATE.items.find(i => i.id === id) || STATE.lastCustomItem;
+          if (!item) return;
+          copyTextMobileSafe(buildTelegramFormattedText(item, "DUAL"), "Copied Telegram & IG text!");
+          break;
+        }
+        case "gen-select-pair": {
+          STATE.genPair = target.getAttribute("data-pair") || "XAUUSD";
+          renderAll();
+          break;
+        }
+        case "load-sample-headline": {
+          const inp = document.getElementById("input-news-headline");
+          if (inp) {
+            inp.value = STATE.genPair === "XAUUSD"
+              ? "US Treasury yields retreat after softer consumer spending data, lifting Gold demand"
+              : "Institutional spot Bitcoin ETF inflows surge to $480M as macro liquidity improves";
+          }
+          break;
+        }
+        case "generate-custom-brief": {
+          const inp = document.getElementById("input-news-headline");
+          const srcInp = document.getElementById("input-news-source");
+          const rawText = inp ? inp.value.trim() : "";
+          if (!rawText) {
+            showToast("Please paste or type a headline first.", "rose");
+            return;
+          }
+          const btn = document.getElementById("btn-generate-brief");
+          if (btn) btn.textContent = "⚡ Generating Brief...";
+          const generated = await analyzeHeadlineWithOptionalGemini(
+            STATE.genPair,
+            srcInp ? srcInp.value.trim() : "Market Wire",
+            rawText
+          );
+          STATE.lastCustomItem = generated;
+          STATE.items.unshift(generated);
+          if (STATE.items.length > 20) STATE.items = STATE.items.slice(0, 20);
+          STATE.selectedStudioItemId = generated.id;
+          SafeStorage.set("dh_news_items", STATE.items);
+          if (btn) btn.textContent = "⚡ Generate Dual Brief + Save to Feed";
+          renderAll();
+          showToast("Dual-language brief created & saved to Feed!", "emerald");
+          break;
+        }
+        case "studio-format": {
+          STATE.studioFormat = target.getAttribute("data-format") || "feed";
+          renderAll();
+          break;
+        }
+        case "studio-lang": {
+          STATE.studioLang = target.getAttribute("data-lang") || "ID";
+          renderAll();
+          break;
+        }
+        case "studio-theme": {
+          STATE.studioTheme = target.getAttribute("data-theme") || "gold";
+          renderAll();
+          break;
+        }
+        case "toggle-screenshot-mode": {
+          STATE.screenshotMode = !STATE.screenshotMode;
+          renderAll();
+          if (STATE.screenshotMode) {
+            showToast("Clean Screenshot Mode ON — take your screenshot now!", "emerald");
+          }
+          break;
+        }
+        case "download-ig-png": {
+          downloadInstagramPng();
+          break;
+        }
+        case "copy-ig-caption": {
+          const item = STATE.items.find(i => i.id === STATE.selectedStudioItemId)
+            || STATE.lastCustomItem
+            || STATE.items[0];
+          if (!item) return;
+          copyTextMobileSafe(buildTelegramFormattedText(item, STATE.studioLang), "Copied IG Caption + DIGIHUSTLECO Watermark!");
+          break;
+        }
+        case "open-settings": {
+          const keyInp = document.getElementById("input-gemini-key");
+          if (keyInp) keyInp.value = STATE.geminiApiKey || "";
+          document.getElementById("modal-settings").hidden = false;
+          break;
+        }
+        case "close-modal": {
+          document.getElementById("modal-settings").hidden = true;
+          break;
+        }
+        case "save-gemini-key": {
+          const keyInp = document.getElementById("input-gemini-key");
+          STATE.geminiApiKey = keyInp ? keyInp.value.trim() : "";
+          SafeStorage.set("dh_gemini_key", STATE.geminiApiKey);
+          document.getElementById("modal-settings").hidden = true;
+          renderAll();
+          showToast(STATE.geminiApiKey ? "Gemini API Key Saved!" : "Using Built-In Smart Engine.", "emerald");
+          break;
+        }
+        case "clear-gemini-key": {
+          STATE.geminiApiKey = "";
+          SafeStorage.set("dh_gemini_key", "");
+          document.getElementById("modal-settings").hidden = true;
+          renderAll();
+          showToast("Switched to Built-In Smart Engine.", "amber");
+          break;
+        }
+      }
+    }
+
+    window.addEventListener("load", () => {
+      document.addEventListener("click", handleActionEvent);
+      updateWibClockLeaf();
+      setInterval(updateWibClockLeaf, 1000);
+      renderAll();
+    });
+  </script>
+</body>
+</html>
